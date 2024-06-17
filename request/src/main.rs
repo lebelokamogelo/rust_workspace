@@ -19,29 +19,34 @@ fn main() {
     match response.status() {
         reqwest::StatusCode::OK => {
             // process data
-            let posts: Vec<Post> = serde_json::from_str(&response.text().unwrap()).unwrap();
-            println!("{:?}", posts[0].title)
+            let _posts: Vec<Post> = serde_json::from_str(&response.text().unwrap()).unwrap();
+            // println!("{:?}", posts[0].title)
         }
 
         reqwest::StatusCode::UNAUTHORIZED => println!("You are not authenticated"),
         _ => print!("Uh oh! Something went wrong"),
     }
+
     // post request
-    // create the request client
+    // create the blocking request client
     let client = Client::new();
 
     let data = Post {
         userId: 1,
         id: 101,
-        title: String::from("new post"),
-        body: String::from("This is a test post request"),
+        title: "New title".to_owned(),
+        body: "New body".to_owned(),
     };
 
+    // sending the request
     let response = client
         .post("https://jsonplaceholder.typicode.com/posts")
         .body(serde_json::to_string(&data).unwrap())
+        .header("Content-Type", "application/json")
         .send()
         .unwrap();
 
-    println!("{:?}", response.text().unwrap())
+    let response_data: Post = serde_json::from_str(&response.text().unwrap()).unwrap();
+
+    println!("{:?}", response_data)
 }
