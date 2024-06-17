@@ -1,8 +1,9 @@
 use reqwest;
-use serde::Deserialize;
+use reqwest::blocking::Client;
+use serde::{Deserialize, Serialize};
 
 // parse the json into struct rust redable format
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 struct Post {
     userId: i32,
     id: i32,
@@ -25,4 +26,22 @@ fn main() {
         reqwest::StatusCode::UNAUTHORIZED => println!("You are not authenticated"),
         _ => print!("Uh oh! Something went wrong"),
     }
+    // post request
+    // create the request client
+    let client = Client::new();
+
+    let data = Post {
+        userId: 1,
+        id: 101,
+        title: String::from("new post"),
+        body: String::from("This is a test post request"),
+    };
+
+    let response = client
+        .post("https://jsonplaceholder.typicode.com/posts")
+        .body(serde_json::to_string(&data).unwrap())
+        .send()
+        .unwrap();
+
+    println!("{:?}", response.text().unwrap())
 }
