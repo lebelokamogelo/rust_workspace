@@ -1,5 +1,6 @@
+#![allow(non_snake_case)]
+
 use reqwest;
-use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 
 // parse the json into struct rust redable format
@@ -11,15 +12,22 @@ struct Post {
     body: String,
 }
 
-fn main() {
-    // blocking client
-    let response = reqwest::blocking::get("https://jsonplaceholder.typicode.com/posts").unwrap();
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // client
+    let client = reqwest::Client::new();
+
+    let response = client
+        .get("https://jsonplaceholder.typicode.com/posts")
+        .send()
+        .await
+        .unwrap();
 
     // matching status code
     match response.status() {
         reqwest::StatusCode::OK => {
             // process data
-            let _posts: Vec<Post> = serde_json::from_str(&response.text().unwrap()).unwrap();
+            let _posts: Vec<Post> = serde_json::from_str(&response.text().await.unwrap()).unwrap();
             // println!("{:?}", posts[0].title)
         }
 
@@ -28,8 +36,6 @@ fn main() {
     }
 
     // post request
-    // create the blocking request client
-    let client = Client::new();
 
     let data = Post {
         userId: 1,
@@ -44,9 +50,11 @@ fn main() {
         .body(serde_json::to_string(&data).unwrap())
         .header("Content-Type", "application/json")
         .send()
+        .await
         .unwrap();
 
-    let response_data: Post = serde_json::from_str(&response.text().unwrap()).unwrap();
+    let response_data: Post = serde_json::from_str(&response.text().await.unwrap()).unwrap();
 
-    println!("{:?}", response_data)
+    println!("{:?}", response_data);
+    Ok(())
 }
