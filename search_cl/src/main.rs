@@ -2,46 +2,27 @@
 // Your program should read a file and a search term (or regular expression) as input,
 // then output all lines from the file that contain the search term.
 //
-use regex::Regex;
-use std::env;
+use clap::Parser;
 use std::fs;
 
-struct Arguments<'a> {
-    file: &'a str,
-    word: &'a str,
+#[derive(Parser, Debug)]
+struct Args {
+    word: String,
+    file: std::path::PathBuf,
 }
 
 fn main() {
-    let args: Vec<_> = env::args().collect();
+    let args = Args::parse();
 
-    if args.len() != 3 {
-        if args.len() == 2 && args[1] == "help" {
-            println!("Usage: cargo run [FILE] [WORD] [OPTIONS]");
-            println!("Options:");
-            println!("help display this help and exit\n");
-        } else {
-            eprintln!("error: invalid arguments\nTry: cargo run help");
-        }
-        return;
-    }
-
-    let file = &args[1];
-    let word = &args[2];
-
-    search(Arguments { file, word })
+    search(args.word, args.file)
 }
 
-fn search(args: Arguments) {
-    let content = fs::read_to_string(args.file).unwrap();
+fn search(word: String, file: std::path::PathBuf) {
+    let content = fs::read_to_string(file).unwrap();
 
-    let pattern = Regex::new(format!("(?i){}", args.word).as_ref()).unwrap();
-
-    content
-        .lines()
-        .map(|line| match pattern.find(line) {
-            Some(_) => line,
-            None => "",
-        })
-        .filter(|line| !line.is_empty())
-        .for_each(|line| println!("- {line}"));
+    for line in content.lines() {
+        if line.to_lowercase().contains(word.to_lowercase().as_str()) {
+            println!("- {}", line)
+        }
+    }
 }
