@@ -3,7 +3,11 @@
 // then output all lines from the file that contain the search term.
 //
 use clap::Parser;
-use std::{fs, process};
+use std::{
+    fs,
+    io::{BufRead, BufReader},
+    process,
+};
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -18,15 +22,15 @@ fn main() {
 }
 
 fn search(word: String, file: std::path::PathBuf) {
-    let content = match fs::read_to_string(file) {
-        Ok(content) => content,
+    let buffer = BufReader::new(match fs::File::open(file) {
+        Ok(file) => file,
         Err(err) => {
-            println!("{err}");
+            println!("{}", err);
             process::exit(0)
         }
-    };
-
-    for line in content.lines() {
+    });
+    for line in buffer.lines() {
+        let line = line.unwrap();
         if line.to_lowercase().contains(word.to_lowercase().as_str()) {
             println!("- {}", line)
         }
