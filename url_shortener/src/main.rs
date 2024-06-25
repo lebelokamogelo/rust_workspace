@@ -63,7 +63,17 @@ fn main() {
                     .read_line(&mut search_url)
                     .expect("Failed to read a line");
 
-                match urls.get(search_url.trim()) {
+                let re = regex::Regex::new(r"/+$").unwrap();
+
+                let new_url = match re.find(&search_url.trim()) {
+                    Some(url) => search_url[0..=url.start()].to_string(),
+                    None => {
+                        search_url.push('/');
+                        search_url.replace("\n", "")
+                    }
+                };
+
+                match urls.get(&new_url) {
                     Some(url) => println!("Redirecting to {url}\n"),
                     None => println!("We’re having trouble finding that site.\n"),
                 }
