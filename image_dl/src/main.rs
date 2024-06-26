@@ -9,7 +9,13 @@ fn main() -> io::Result<()> {
 
     io::stdin().read_line(&mut url).unwrap();
 
-    let mut response = reqwest::blocking::get(url.trim()).unwrap();
+    let mut response = match reqwest::blocking::get(url.trim()) {
+        Ok(response) => response,
+        Err(err) => {
+            println!("{}", err);
+            std::process::exit(0)
+        }
+    };
 
     let mut file = File::create("image.png")?;
 
