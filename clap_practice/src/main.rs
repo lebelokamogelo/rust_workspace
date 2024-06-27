@@ -17,11 +17,20 @@ fn main() {
                     Arg::new("email")
                         .short('e')
                         .long("email")
-                        .required(true)
                         .help("Email address"),
                 ),
         )
         .about("Application is unknown")
         .version("1.0.0")
         .get_matches();
+
+    if let Some(create) = m.subcommand_matches("create") {
+        println!(
+            "Username: {} and Email address: {}",
+            create.get_one::<String>("username").unwrap(),
+            create
+                .get_one::<String>("email")
+                .unwrap_or(&"No email provided".to_string())
+        )
+    }
 }
