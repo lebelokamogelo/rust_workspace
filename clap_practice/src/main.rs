@@ -1,4 +1,4 @@
-use clap::{command, Arg, Command};
+use clap::{arg, command, Arg, Command};
 
 fn main() {
     let m = command!()
@@ -20,6 +20,7 @@ fn main() {
                         .help("Email address"),
                 ),
         )
+        .arg(arg!(-c --config <API_KEY> "Configure the API KEY").required(true))
         .about("Application is unknown")
         .version("1.0.0")
         .get_matches();
@@ -33,4 +34,5 @@ fn main() {
                 .unwrap_or(&"No email provided".to_string())
         )
     }
+    println!("Your API KEY: {}", m.get_one::<String>("config").unwrap())
 }
